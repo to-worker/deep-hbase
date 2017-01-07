@@ -11,6 +11,7 @@ import org.apache.hadoop.hbase.client.{Get, Put, HTable}
 import org.apache.hadoop.hbase.util.Bytes
 
 /**
+  * Data Entry in HBase.
   * Created on 2017/1/6
   *
   * @author feng.wei
@@ -28,6 +29,15 @@ object FaceCodeManager {
         hTable.close()
     }
 
+    /**
+      * Get the value according to the rowkey, family and qualifier.
+      *
+      * @param hTable
+      * @param rowkey
+      * @param family
+      * @param qualifier
+      * @return
+      */
     def getByRow(hTable: HTable, rowkey: String, family: String, qualifier: String): String = {
 
         val result = hTable.get(new Get(Bytes.toBytes(rowkey)))
@@ -36,11 +46,28 @@ object FaceCodeManager {
         } else "is null"
     }
 
+    /**
+      * Construnct the put qualifier and value.
+      *
+      * @param rowkey
+      * @param family
+      * @param qualifier
+      * @param value
+      * @return
+      */
     def put(rowkey: String, family: String, qualifier: String, value: String): Put = {
         new Put(Bytes.toBytes(rowkey))
                 .add(Bytes.toBytes(family), Bytes.toBytes(qualifier), Bytes.toBytes(value))
     }
 
+    /**
+      * Construct the put contained multiple-twin wth qualifier and value.
+      *
+      * @param rowkey
+      * @param family
+      * @param map : contains qualifier and value.
+      * @return
+      */
     def put(rowkey: String, family: String, map: util.Map[String, String]): Put = {
         val put = new Put(Bytes.toBytes(rowkey))
         val iter = map.entrySet().iterator()
@@ -51,6 +78,13 @@ object FaceCodeManager {
         put
     }
 
+    /**
+      * put the datas that comes from the file.
+      *
+      * @param hTable
+      * @param configuration
+      * @param file :  the path to the file.
+      */
     def putDataFromTextFile(hTable: HTable, configuration: Configuration, file: String): Unit = {
         val fileSystem: FileSystem = FileSystem.get(configuration)
         val path: Path = new Path(file)
@@ -77,7 +111,7 @@ object FaceCodeManager {
             map.put("code", code)
             map.put("sex", "男")
             map.put("nation", "汉族")
-            map.put("img__addr", img_addr)
+            map.put("img_addr", img_addr)
             map.put("mark", "details")
             map.put("birthday", "2016-12-12")
 

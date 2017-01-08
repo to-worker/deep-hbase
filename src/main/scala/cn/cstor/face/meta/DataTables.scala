@@ -5,7 +5,7 @@ package cn.cstor.face.meta
   *
   * @author feng.wei
   */
-case class DataTables(namespace: String) extends Serializable {
+case class DataTables(val namespace: String) extends Serializable {
 
     object FaceInfo extends Serializable {
         val name = s"$namespace:id_code"

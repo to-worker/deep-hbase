@@ -5,6 +5,7 @@ import java.util.Properties
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.HBaseConfiguration
+import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.io.Source
 
@@ -27,6 +28,12 @@ object Config {
         val configuration: Configuration = new Configuration
         configuration.set("fs.default.name", props.getProperty("fs.default.name", ""))
         configuration
+    }
+
+    def getSparkConfig(): SparkContext = {
+        val conf = new SparkConf().setMaster("spark://178.68.0.34:7077")
+        val sparkContext = new SparkContext(conf)
+        sparkContext
     }
 
     def getHBaseConfig(): Configuration = {

@@ -33,6 +33,9 @@ object FaceCodeManager {
 //            properties
 //        }
 
+        val nationFile = Config.props.getProperty("nationFile")
+        val perNationFile = Config.props.getProperty("perNationFile")
+        val keyPersonInfoFile = Config.props.getProperty("keyPersonInfoFile")
         // face:id_code
         val tableFace = dataTables.FaceInfo
         val hTableFace: HTable = new HTable(Config.getHBaseConfig(), tableFace.name)
@@ -46,18 +49,15 @@ object FaceCodeManager {
         val tablePerNation = dataTables.PerNation
         val hTablePerNation: HTable = new HTable(Config.getHBaseConfig(),tablePerNation.name)
 
-        //  与重人员信息表建立链接
-        DataSource.readXlsx(hTableKey,Config.getHadoopConfig(),
-            "/home/cls/data/xinjiang/minzu.xlsx","key")
-        DataSource.Insert("face:key_person_info","face:id_code")
-        DataSource.readXlsx(hTablePerNation,Config.getHBaseConfig(),
-            "/home/cls/data/xinjiang/BeiZHU.xlsx","perNation")
+        DataSource.readXlsx(hTableNation,Config.getHadoopConfig(),nationFile,"nation")
+        DataSource.readXlsx(hTableKey,Config.getHadoopConfig(), keyPersonInfoFile,"key")
+        DataSource.Insert("face:key_person_info","face:id_code","key")
+        DataSource.readXlsx(hTablePerNation,Config.getHBaseConfig(), perNationFile,"perNation")
+        DataSource.Insert("face:person_nation","face:id_code","perNation")
+
                                                 
         hTableFace.close()
         hTableKey.close()
         hTableNation.close()
     }
-
-
-
 }

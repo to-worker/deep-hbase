@@ -18,12 +18,6 @@ import org.apache.hadoop.hbase.util.Bytes;
   */
 object DataSource {
 
-//    def main(args: Array[String]) {
-//        val path = "/home/cls/data/minzu.xlsx"
-//        readXlsx(path)
-//    }
-
-
     /**
       * Get the value according to the rowkey, family and qualifier.
       *
@@ -135,12 +129,7 @@ object DataSource {
       * @param filePath
       */
     def readXlsx(hTable: HTable,configuration: Configuration,filePath: String,choice : String): Unit = {
-//        val fileSystem: FileSystem = FileSystem.get(configuration)
-//        val path: Path = new Path(filePath)
-//        val fileStatus: FileStatus = fileSystem.getFileStatus(path)
-//        val inputStream: FSDataInputStream = fileSystem.open(path)
 
-//        val workbook = new XSSFWorkbook(inputStream)
         val workbook = new XSSFWorkbook(new FileInputStream(filePath))
 
         val list: util.List[Put] = new util.ArrayList[Put]
@@ -168,7 +157,6 @@ object DataSource {
                     list.add(put(rank1,"num",map))
                 }
             }
-
 //            if (row != null) {
 //                for (j <- row.getFirstCellNum until (row.getLastCellNum)) {
 //                    val cell = row.getCell(j)
@@ -182,40 +170,44 @@ object DataSource {
         hTable.close
     }
 
-    def Insert(fromTableName:String,toTableName:String): Unit ={
-//        var count = 0
+    def Insert(fromTableName:String,toTableName:String,choice : String): Unit ={
         val conf = new Configuration()
-//        val table = new HTable(conf, tableName)
-//        val rs:ResultScanner = table.getScanner(new Scan())
-//        var result:Result = new Result()
-//        for (result<- rs.next()){
-//            result.
-//        }
+        val list: util.List[Put] = new util.ArrayList[Put]
 
-        val fTable=new HTable(conf, fromTableName)
-        val tTable=new HTable(conf, toTableName)
-        val scan=new Scan();
-        //指定最多返回的Cell数目。用于防止一行中有过多的数据，导致OutofMemory错误。
-        scan.setBatch(1000);
+        val fTable = new HTable(conf, fromTableName)
+        val tTable = new HTable(conf, toTableName)
+        val nTable = new HTable(conf,"face:nation")
+        val scan=new Scan()
+        scan.setBatch(1000)
         val rs = fTable.getScanner(scan);
 
         val results:util.Iterator[Result] = rs.iterator()
         while (results.hasNext){
             val r = results.next()
             val id = Bytes.toString(r.getRow())
-            val family = Bytes.toBytes("message")
-            val qualifier = Bytes.toBytes("message")
-            val message = r.getValue(family,qualifier)
 
-            val get = new Get(id.getBytes)
+            val get = new Get(Bytes.toBytes(id))
             val last =tTable.get (get)
             if(last.value()!=null){
-                println("-------------------------")
-            }
-//            println(last.value())
+                choice match {
+                    case "key" =>{
+                        val message = getByRow(fTable,id,"message","message")
+                        list.add(put(id,"f","mark",message))
+                    }
+                    case "perNation" =>{
+                        val num = getByRow(fTable,id,"num","num")
+                        val nation = getByRow(nTable,num,"num","num")
+                        list.add(put(id,"f","nation",nation))
+                    }
+                }
 
+            } else {
+                println("Not Found")
+            }
         }
+        tTable.put(list)
         rs.close();
+        tTable.close()
 
     }
 }

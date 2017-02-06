@@ -6,5 +6,6 @@ target/*
 *.jar
 checkpoint/*
 output/*
+test/*
 tmp/*
 *.bak
